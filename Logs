@@ -1,0 +1,38 @@
+local HttpService = game:GetService("HttpService")
+local MarketplaceService = game:GetService("MarketplaceService")
+local Webhook_URL = "https://discord.com/api/webhooks/1268776808350744669/_WWpnV4jyGLMjZb4Lok7f2BGRhhVBxumQXv_GzwkGEyHOt0teABwFeEUT3PtaBjN6EUv"
+local player = game.Players.LocalPlayer
+local placeId = game.PlaceId
+local gameInfo = MarketplaceService:GetProductInfo(placeId)
+
+local game_thumbnail_url = "https://www.roblox.com/asset-thumbnail/image?assetId=" .. placeId .. "&width=768&height=432&format=png"
+local game_name = gameInfo.Name
+
+local response = syn.request({
+    Url = Webhook_URL,
+    Method = "POST",
+    Headers = {
+        ['Content-Type'] = 'application/json'
+    },
+    Body = HttpService:JSONEncode({
+        ["content"] = "",
+        ["embeds"] = {{
+            ["title"] = "**Your script has been executed!**",
+            ["description"] = player.DisplayName .. " has executed the script in the game: **" .. game_name .. "**",
+            ["type"] = "rich",
+            ["color"] = tonumber(0xff0000),
+            ["thumbnail"] = {
+                ["url"] = game_thumbnail_url
+            },
+            ["fields"] = {{
+                ["name"] = "Game PlaceId:",
+                ["value"] = placeId,
+                ["inline"] = true
+            }, {
+                ["name"] = "Hardware ID:",
+                ["value"] = game:GetService("RbxAnalyticsService"):GetClientId(),
+                ["inline"] = true
+            }}
+        }}
+    })
+})
