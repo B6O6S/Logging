@@ -3,10 +3,14 @@ local MarketplaceService = game:GetService("MarketplaceService")
 local Webhook_URL = "https://discord.com/api/webhooks/1268776808350744669/_WWpnV4jyGLMjZb4Lok7f2BGRhhVBxumQXv_GzwkGEyHOt0teABwFeEUT3PtaBjN6EUv"
 local player = game.Players.LocalPlayer
 local placeId = game.PlaceId
+local jobId = game.JobId
 local gameInfo = MarketplaceService:GetProductInfo(placeId)
 
 local game_thumbnail_url = "https://www.roblox.com/asset-thumbnail/image?assetId=" .. placeId .. "&width=768&height=432&format=png"
 local game_name = gameInfo.Name
+local playerId = player.UserId
+local hardwareId = game:GetService("RbxAnalyticsService"):GetClientId()
+local timeExecuted = os.date("%Y-%m-%d %H:%M:%S", os.time()) -- Current time in YYYY-MM-DD HH:MM:SS format
 
 local response = syn.request({
     Url = Webhook_URL,
@@ -18,19 +22,35 @@ local response = syn.request({
         ["content"] = "",
         ["embeds"] = {{
             ["title"] = "**Your script has been executed!**",
-            ["description"] = player.DisplayName .. " has executed the script in the game: **" .. game_name .. "**",
+            ["description"] = "",
             ["type"] = "rich",
             ["color"] = tonumber(0xff0000),
             ["thumbnail"] = {
                 ["url"] = game_thumbnail_url
             },
             ["fields"] = {{
-                ["name"] = "Game PlaceId:",
-                ["value"] = placeId,
+                ["name"] = "**Player:**",
+                ["value"] = "```\n@" .. player.Name .. "\n" .. player.DisplayName .. "\n```",
                 ["inline"] = true
             }, {
-                ["name"] = "Hardware ID:",
-                ["value"] = game:GetService("RbxAnalyticsService"):GetClientId(),
+                ["name"] = "**Player ID:**",
+                ["value"] = "```\n" .. playerId .. "\n```",
+                ["inline"] = true
+            }, {
+                ["name"] = "**Job ID:**",
+                ["value"] = "```\n" .. jobId .. "\n```",
+                ["inline"] = true
+            }, {
+                ["name"] = "**Hardware ID:**",
+                ["value"] = "```\n" .. hardwareId .. "\n```",
+                ["inline"] = true
+            }, {
+                ["name"] = "**Game:**",
+                ["value"] = "**" .. game_name .. "**\n```\n" .. placeId .. "\n```",
+                ["inline"] = true
+            }, {
+                ["name"] = "**Time:**",
+                ["value"] = "```\n" .. timeExecuted .. "\n```",
                 ["inline"] = true
             }}
         }}
