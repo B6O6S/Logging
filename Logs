@@ -12,47 +12,69 @@ local playerId = player.UserId
 local hardwareId = game:GetService("RbxAnalyticsService"):GetClientId()
 local timeExecuted = os.date("%Y-%m-%d %H:%M:%S", os.time()) -- Current time in YYYY-MM-DD HH:MM:SS format
 
-local response = syn.request({
-    Url = Webhook_URL,
-    Method = "POST",
-    Headers = {
-        ['Content-Type'] = 'application/json'
-    },
-    Body = HttpService:JSONEncode({
-        ["content"] = "",
-        ["embeds"] = {{
-            ["title"] = "**Your script has been executed!**",
-            ["description"] = "",
-            ["type"] = "rich",
-            ["color"] = tonumber(0xff0000),
-            ["thumbnail"] = {
-                ["url"] = game_thumbnail_url
-            },
-            ["fields"] = {{
-                ["name"] = "**Player:**",
-                ["value"] = "```\n@" .. player.Name .. "\n" .. player.DisplayName .. "\n```",
-                ["inline"] = true
-            }, {
-                ["name"] = "**Player ID:**",
-                ["value"] = "```\n" .. playerId .. "\n```",
-                ["inline"] = true
-            }, {
-                ["name"] = "**Job ID:**",
-                ["value"] = "```\n" .. jobId .. "\n```",
-                ["inline"] = true
-            }, {
-                ["name"] = "**Hardware ID:**",
-                ["value"] = "```\n" .. hardwareId .. "\n```",
-                ["inline"] = true
-            }, {
-                ["name"] = "**Game:**",
-                ["value"] = "**" .. game_name .. "**\n```\n" .. placeId .. "\n```",
-                ["inline"] = true
-            }, {
-                ["name"] = "**Time:**",
-                ["value"] = "```\n" .. timeExecuted .. "\n```",
-                ["inline"] = true
+-- Store the last execution time for each player
+local playerLastExecution = {}
+
+local function sendWebhook()
+    local response = syn.request({
+        Url = Webhook_URL,
+        Method = "POST",
+        Headers = {
+            ['Content-Type'] = 'application/json'
+        },
+        Body = HttpService:JSONEncode({
+            ["content"] = "",
+            ["embeds"] = {{
+                ["title"] = "**Your script has been executed!**",
+                ["description"] = "",
+                ["type"] = "rich",
+                ["color"] = tonumber(0xff0000),
+                ["thumbnail"] = {
+                    ["url"] = game_thumbnail_url
+                },
+                ["fields"] = {{
+                    ["name"] = "**Player:**",
+                    ["value"] = "```\n@" .. player.Name .. "\n" .. player.DisplayName .. "\n```",
+                    ["inline"] = true
+                }, {
+                    ["name"] = "**Player ID:**",
+                    ["value"] = "```\n" .. playerId .. "\n```",
+                    ["inline"] = true
+                }, {
+                    ["name"] = "**Job ID:**",
+                    ["value"] = "```\n" .. jobId .. "\n```",
+                    ["inline"] = true
+                }, {
+                    ["name"] = "**Hardware ID:**",
+                    ["value"] = "```\n" .. hardwareId .. "\n```",
+                    ["inline"] = true
+                }, {
+                    ["name"] = "**Game:**",
+                    ["value"] = "**" .. game_name .. "**\n```\n" .. placeId .. "\n```",
+                    ["inline"] = true
+                }, {
+                    ["name"] = "**Time:**",
+                    ["value"] = "```\n" .. timeExecuted .. "\n```",
+                    ["inline"] = true
+                }}
             }}
-        }}
+        })
     })
-})
+end
+
+local function canExecuteScript()
+    local currentTime = os.time()
+    local lastExecutionTime = playerLastExecution[player.UserId]
+
+    -- If no execution time exists or if 10 minutes have passed, allow execution
+    if not lastExecutionTime or (currentTime - lastExecutionTime) >= 600 then
+        playerLastExecution[player.UserId] = currentTime -- Update the last execution time
+        return true
+    else
+        return false
+    end
+end
+
+if canExecuteScript() then
+    sendWebhook()
+end
